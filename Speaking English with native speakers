@@ -1,0 +1,43 @@
+pip install flask twilio
+# app.py (Backend using Flask)
+from flask import Flask, render_template, request
+from twilio.twiml.voice_response import Gather, VoiceResponse
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/voice', methods=['POST'])
+def voice():
+    response = VoiceResponse()
+
+    with response.gather(numDigits=1, action='/handle-key', method='POST') as gather:
+        gather.say('Press 1 to connect with a native speaker.')
+
+    return str(response)
+
+@app.route('/handle-key', methods=['POST'])
+def handle_key():
+    digit_pressed = request.form['Digits']
+
+    if digit_pressed == '1':
+        # Implement logic to connect to a native speaker
+        # You can use Twilio Video API for this purpose
+
+        # Placeholder response
+        response = VoiceResponse()
+        response.say('Connecting you with a native speaker. Please wait.')
+
+        return str(response)
+
+    # Handle other key presses if needed
+    else:
+        response = VoiceResponse()
+        response.say('Invalid input. Please try again.')
+
+        return str(response)
+
+if __name__ == '__main__':
+    app.run(debug=True)

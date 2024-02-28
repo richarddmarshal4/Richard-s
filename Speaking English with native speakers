@@ -18,3 +18,43 @@ def voice():
 
     return str(response)
 
+@app.route('/handle-key', methods=['POST'])
+def handle_key():
+    digit_pressed = request.form['Digits']
+
+    if digit_pressed == '1':
+        # Implement logic to connect to a native speaker
+        # You can use Twilio Video API for this purpose
+
+        # Placeholder response
+        response = VoiceResponse()
+        response.say('Connecting you with a native speaker. Please wait.')
+
+        return str(response)
+
+    # Handle other key presses if needed
+    else:
+        response = VoiceResponse()
+        response.say('Invalid input. Please try again.')
+
+        return str(response)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+<!-- templates/index.html (Frontend) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speak with a Native Speaker</title>
+</head>
+<body>
+    <h1>Welcome to Speak with a Native Speaker</h1>
+    <p>Press 1 to connect with a native speaker.</p>
+
+    <script src="https://media.twiliocdn.com/sdk/js/video/releases/2.15.0/twilio-video.min.js"></script>
+</body>
+</html>
+
+

@@ -1,0 +1,50 @@
+<!-- templates/video_chat.html (Frontend) -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Chat</title>
+    <script src="https://media.twiliocdn.com/sdk/js/video/releases/2.15.0/twilio-video.min.js"></script>
+</head>
+<body>
+    <h1>Video Chat</h1>
+    <div id="video-container"></div>
+
+    <script>
+        // Initialize Twilio Video
+        const token = "{{ token }}";
+        Twilio.Video.createLocalTracks().then(localTracks => {
+            return Twilio.Video.connect(token, {
+                name: 'MyRoom',
+                tracks: localTracks
+            });
+        }).then(room => {
+            console.log(`Successfully joined a Room: ${room.name}`);
+
+            room.participants.forEach(participant => {
+                console.log(`Participant "${participant.identity}" is connected to the Room`);
+                participant.tracks.forEach(track => {
+                    document.getElementById('video-container').appendChild(track.attach());
+                });
+            });
+
+            room.on('participantConnected', participant => {
+                console.log(`Participant "${participant.identity}" connected`);
+                participant.tracks.forEach(track => {
+                    document.getElementById('video-container').appendChild(track.attach());
+                });
+            });
+
+            room.on('participantDisconnected', participant => {
+                console.log(`Participant "${participant.identity}" disconnected`);
+                participant.tracks.forEach(track => {
+                    track.detach().forEach(element => element.remove());
+                });
+            });
+        }).catch(error => {
+            console.error(`Unable to connect to Room: ${error.message}`);
+        });
+    </script>
+</body>
+</html>

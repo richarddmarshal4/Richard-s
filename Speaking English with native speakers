@@ -1,60 +1,44 @@
-pip install flask twilio
 # app.py (Backend using Flask)
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, session, redirect, url_for
 from twilio.twiml.voice_response import Gather, VoiceResponse
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
+
+# Placeholder data for demonstration
+users = {
+    'user1': {'username': 'user1', 'password': 'password1', 'language': 'English', 'proficiency': 'Native'},
+    'user2': {'username': 'user2', 'password': 'password2', 'language': 'Spanish', 'proficiency': 'Intermediate'}
+}
 
 @app.route('/')
 def index():
+    if 'username' in session:
+        return render_template('dashboard.html', username=session['username'])
     return render_template('index.html')
 
-@app.route('/voice', methods=['POST'])
-def voice():
-    response = VoiceResponse()
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if username in users and users[username]['password'] == password:
+            session['username'] = username
+            return redirect(url_for('index'))
+    return render_template('login.html')
 
-    with response.gather(numDigits=1, action='/handle-key', method='POST') as gather:
-        gather.say('Press 1 to connect with a native speaker.')
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    return redirect(url_for('index'))
 
-    return str(response)
+@app.route('/dashboard')
+def dashboard():
+    if 'username' in session:
+        return render_template('dashboard.html', username=session['username'])
+    return redirect(url_for('login'))
 
-@app.route('/handle-key', methods=['POST'])
-def handle_key():
-    digit_pressed = request.form['Digits']
-
-    if digit_pressed == '1':
-        # Implement logic to connect to a native speaker
-        # You can use Twilio Video API for this purpose
-
-        # Placeholder response
-        response = VoiceResponse()
-        response.say('Connecting you with a native speaker. Please wait.')
-
-        return str(response)
-
-    # Handle other key presses if needed
-    else:
-        response = VoiceResponse()
-        response.say('Invalid input. Please try again.')
-
-        return str(response)
+# Other routes for profile management, scheduling, etc.
 
 if __name__ == '__main__':
     app.run(debug=True)
-<!-- templates/index.html (Frontend) -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Speak with a Native Speaker</title>
-</head>
-<body>
-    <h1>Welcome to Speak with a Native Speaker</h1>
-    <p>Press 1 to connect with a native speaker.</p>
-
-    <script src="https://media.twiliocdn.com/sdk/js/video/releases/2.15.0/twilio-video.min.js"></script>
-</body>
-</html>
-
-
